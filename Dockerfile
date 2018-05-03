@@ -14,7 +14,7 @@
 FROM illagrenan/alpine-curl as builder
 
 RUN curl -fsSL \
-      http://storage.googleapis.com/tensorflow-serving-apt/pool/tensorflow-model-server/t/tensorflow-model-server/tensorflow-model-server_1.3.0_all.deb \
+      http://storage.googleapis.com/tensorflow-serving-apt/pool/tensorflow-model-server/t/tensorflow-model-server/tensorflow-model-server_1.4.0_all.deb \
       -o /tmp/tensorflow_model_server.deb
 
 
