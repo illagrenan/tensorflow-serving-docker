@@ -1,0 +1,9 @@
+.git/
+.idea/
+*.pyc
+*.pyo
+*.swp
+*.cache
+.tox
+.coverage
+__pycache__
