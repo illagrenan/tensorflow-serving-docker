@@ -7,6 +7,20 @@
 #     >>> docker build -t illagrenan/tensorflow-serving .
 #
 # =====================================================================
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Stage 1
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+FROM illagrenan/alpine-curl as builder
+
+RUN curl -fsSL \
+      http://storage.googleapis.com/tensorflow-serving-apt/pool/tensorflow-model-server/t/tensorflow-model-server/tensorflow-model-server_1.3.0_all.deb \
+      -o /tmp/tensorflow_model_server.deb
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# Stage 2
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 FROM ubuntu:16.04
 LABEL authors="Vašek Dohnal <vaclav.dohnal@gmail.com>"
 
@@ -17,23 +31,12 @@ ENV HOME /root
 ENV DEBIAN_FRONTEND noninteractive
 
 # ----------------------------------------------------------------------------------------------------
-# 2. Install curl so we can fetch Google GPG key
-# ----------------------------------------------------------------------------------------------------
-RUN apt-get update && apt-get install -y -q --no-install-recommends \
-    curl \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
-
-# ----------------------------------------------------------------------------------------------------
-# 3. Install Tensorflow Serving via APT
+# 2. Install Tensorflow Serving via APT
 #    https://www.tensorflow.org/serving/setup#installing_using_apt-get
 # ----------------------------------------------------------------------------------------------------
-RUN echo "deb [arch=amd64] http://storage.googleapis.com/tensorflow-serving-apt stable tensorflow-model-server tensorflow-model-server-universal" | tee /etc/apt/sources.list.d/tensorflow-serving.list \
-    && curl -fsSL https://storage.googleapis.com/tensorflow-serving-apt/tensorflow-serving.release.pub.gpg | apt-key add -
-
-RUN apt-get update && apt-get install -y -q --no-install-recommends \
-    tensorflow-model-server \
-    && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /tmp/tensorflow_model_server.deb /tmp/tensorflow_model_server.deb
+RUN dpkg -i /tmp/tensorflow_model_server.deb
+RUN rm -f /tmp/tensorflow_model_server.deb
 
 # Verify tensorflow_model_server binary exists
 RUN whereis tensorflow_model_server
